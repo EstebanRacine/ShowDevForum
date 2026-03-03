@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 6 - Jeu des Gestes ✌️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #121212 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(20, 20, 35, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(255, 20, 147, 0.3);
+            border: 1px solid rgba(255, 20, 147, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ff69b4;
+            margin-bottom: 25px;
+            font-size: 0.9em;
+        }
+
+        .game-area {
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            background: #0a0a0a;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 20, 147, 0.3);
+            width: 100%;
+        }
+
+        #video {
+            width: 100%;
+            height: 480px;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            z-index: 5;
+        }
+
+        #gameBoard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .square {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.1s;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.5);
+            border: 3px solid #fff;
+            pointer-events: auto;
+        }
+
+        .square:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.8);
+        }
+
+        .square.hit {
+            background: linear-gradient(135deg, #00ff00, #00aa00);
+            animation: hitAnimation 0.3s ease-out;
+        }
+
+        @keyframes hitAnimation {
+            0% { transform: scale(1.2); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 0 0 15px 0;
+            border-bottom: 1px solid rgba(255, 20, 147, 0.2);
+        }
+
+        .stat {
+            background: rgba(255, 20, 147, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 20, 147, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #ff69b4;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ff1493;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #btnDemarrer {
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            color: white;
+        }
+
+        #btnDemarrer:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.4);
+        }
+
+        #btnDemarrer:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #btnArreter {
+            background: rgba(255, 20, 147, 0.2);
+            color: #ff69b4;
+            border: 2px solid #ff69b4;
+        }
+
+        #btnArreter:hover:not(:disabled) {
+            background: rgba(255, 20, 147, 0.3);
+            transform: translateY(-2px);
+        }
+
+        #btnArreter:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .status.ok {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .status.attente {
+            background: rgba(255, 165, 0, 0.1);
+            color: #ffa500;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+        }
+
+        .status.erreur {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .game-info {
+            background: rgba(255, 20, 147, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 20, 147, 0.2);
+        }
+
+        .geste-instruction {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffff00;
+            border: 3px solid #ffff00;
+            z-index: 20;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+        }
+
+        .geste-instruction.reussi {
+            background: rgba(0, 255, 0, 0.8);
+            border-color: #00ff00;
+            color: #fff;
+            animation: pulse 0.3s ease-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        .hand-points {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+        }
+
+        .finger-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #ffff00, #ff6600);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+            transform: translate(-6px, -6px);
+            z-index: 15;
+        }
+
+        @media (max-width: 768px) {
+            #video {
+                height: 320px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✌️ Jeu des Gestes</h1>
+        <p class="subtitle">Reproduisez les gestes avec vos mains pour gagner des points !</p>
+
+        <div class="controls">
+            <button id="btnDemarrer">▶️ Démarrer</button>
+            <button id="btnArreter" disabled>⏹️ Arrêter</button>
+        </div>
+
+        <div id="status" class="status ok">🎯 Prêt à démarrer - Cliquez sur "Démarrer"</div>
+
+        <div class="game-area">
+            <div class="video-container">
+                <video id="video" playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div id="gameBoard"></div>
+                <div class="hand-points" id="handPoints"></div>
+                <div class="geste-instruction" id="instruction">Faites: 👋 Main ouverte</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Temps (s)</div>
+                <div class="stat-value" id="timer">60</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Geste actuel</div>
+                <div class="stat-value" id="gesteActuel" style="font-size: 2.5em;">👋</div>
+            </div>
+        </div>
+
+        <div class="game-info">
+            <strong>🎮 Comment jouer :</strong><br>
+            • Cliquez sur "Démarrer" pour lancer le jeu (60 secondes)<br>
+            • Reproduisez le geste affiché avec votre main<br>
+            • Gagnez 10 points par geste réussi<br>
+            • Gestes: 👋 Main ouverte, 👍 Pouce levé, ✌️ Victory, 👌 OK, ✊ Poing, 🤘 Rock
+        </div>
+    </div>
+
+    <!-- Charger MediaPipe -->
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+
+    <script>
+        class JeuDoigts {
+            constructor() {
+                // Éléments DOM
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gameBoard = document.getElementById('gameBoard');
+                this.handPoints = document.getElementById('handPoints');
+                this.btnDemarrer = document.getElementById('btnDemarrer');
+                this.btnArreter = document.getElementById('btnArreter');
+                this.statusEl = document.getElementById('status');
+                this.scoreEl = document.getElementById('score');
+                this.timerEl = document.getElementById('timer');
+                this.gesteActuelEl = document.getElementById('gesteActuel');
+                this.instructionEl = document.getElementById('instruction');
+
+                // État du jeu
+                this.enCours = false;
+                this.score = 0;
+                this.temps = 60; // 60 secondes
+                this.dureeJeu = 60;
+                this.mains = null;
+                this.camera = null;
+                this.intervalTimer = null;
+                this.gesteDetectionTime = 0;
+                this.dernierGesteReussi = 0;
+
+                // Liste des gestes possibles
+                this.gestes = [
+                    { nom: '👋 Main ouverte', emoji: '👋', fonction: 'detecterMainOuverte' },
+                    { nom: '👍 Pouce levé', emoji: '👍', fonction: 'detecterPouceLeve' },
+                    { nom: '✌️ Victory', emoji: '✌️', fonction: 'detecterVictory' },
+                    { nom: '👌 OK', emoji: '👌', fonction: 'detecterOK' },
+                    { nom: '✊ Poing fermé', emoji: '✊', fonction: 'detecterPoing' },
+                    { nom: '🤘 Rock', emoji: '🤘', fonction: 'detecterRock' }
+                ];
+                this.gesteCible = null;
+                this.intervalTimer = null;
+
+                // Points de référence de la main (MediaPipe Hands)
+                // 8 = index, 4 = pouce
+                this.indexDroit = 8;
+                this.indexGauche = 8;
+                this.pouceDroit = 4;
+                this.pouceGauche = 4;
+
+                // Carré actuel
+                this.carreActuel = null;
+
+                this.attacherEvenements();
+                this.initialiserMediaPipe();
+            }
+
+            mettreAJourEtat(classe, texte) {
+                this.statusEl.className = `status ${classe}`;
+                this.statusEl.textContent = texte;
+                console.log(texte);
+            }
+
+            initialiserMediaPipe() {
+                const verifier = setInterval(() => {
+                    if (window.Hands && window.Camera) {
+                        clearInterval(verifier);
+                        console.log('✅ MediaPipe Hands et Camera détectés');
+
+                        try {
+                            console.log('🚀 Création instance Hands...');
+                            this.mains = new Hands({
+                                locateFile: (file) => {
+                                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                                }
+                            });
+
+                            console.log('⚙️ Configuration Hands...');
+                            this.mains.setOptions({
+                                maxNumHands: 2,
+                                modelComplexity: 1,
+                                minDetectionConfidence: 0.5,
+                                minTrackingConfidence: 0.5
+                            });
+
+                            console.log('📌 Enregistrement callback...');
+                            this.mains.onResults((results) => {
+                                console.log('🎯 Callback onResults reçu!', results);
+                                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                                    console.log(`👋 ${results.multiHandLandmarks.length} main(s) détectée(s)`);
+                                } else {
+                                    console.log('❌ Aucune main détectée');
+                                }
+                                this.traiterMains(results);
+                            });
+
+                            this.mettreAJourEtat('ok', '✅ Prêt à démarrer - Autorisez l\'accès caméra quand demandé');
+                        } catch (error) {
+                            console.error('❌ Erreur:', error);
+                            this.mettreAJourEtat('erreur', '❌ Erreur MediaPipe');
+                        }
+                    }
+                }, 100);
+            }
+
+            attacherEvenements() {
+                this.btnDemarrer.addEventListener('click', () => this.demarrer());
+                this.btnArreter.addEventListener('click', () => this.arreter());
+            }
+
+            async demarrer() {
+                if (this.enCours) return;
+                if (!this.mains) {
+                    this.mettreAJourEtat('erreur', '❌ MediaPipe non prêt');
+                    return;
+                }
+
+                console.log('🎮 Démarrage du jeu...');
+                this.mettreAJourEtat('attente', '⏳ Accès caméra...');
+
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 640, height: 480 }
+                    });
+
+                    this.video.srcObject = stream;
+
+                    this.video.onloadedmetadata = () => {
+                        this.video.play();
+                        this.canvas.width = this.video.videoWidth;
+                        this.canvas.height = this.video.videoHeight;
+
+                        this.camera = new Camera(this.video, {
+                            onFrame: async () => {
+                                if (this.mains) {
+                                    await this.mains.send({ image: this.video });
+                                }
+                            },
+                            width: 640,
+                            height: 480
+                        });
+
+                        this.camera.start();
+                        this.enCours = true;
+                        this.score = 0;
+                        this.temps = 60;
+                        this.scoreEl.textContent = '0';
+                        this.timerEl.textContent = '60';
+
+                        this.btnDemarrer.disabled = true;
+                        this.btnArreter.disabled = false;
+
+                        this.choisirNouveauGeste();
+                        this.demarrerTimer();
+                        this.mettreAJourEtat('ok', '🎮 JEU EN COURS - Reproduisez le geste !');
+                    };
+                } catch (erreur) {
+                    console.error('❌ Erreur caméra:', erreur);
+                    this.mettreAJourEtat('erreur', '❌ impossible d\'accéder à la caméra');
+                }
+            }
+
+            arreter() {
+                if (this.camera) {
+                    this.camera.stop();
+                    this.camera = null;
+                }
+
+                if (this.video.srcObject) {
+                    this.video.srcObject.getTracks().forEach(t => t.stop());
+                }
+
+                if (this.intervalTimer) {
+                    clearInterval(this.intervalTimer);
+                }
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.handPoints.innerHTML = '';
+                this.enCours = false;
+
+                this.btnDemarrer.disabled = false;
+                this.btnArreter.disabled = true;
+
+                this.mettreAJourEtat('ok', `🎉 Jeu terminé ! Score final: ${this.score}`);
+            }
+
+            demarrerTimer() {
+                this.intervalTimer = setInterval(() => {
+                    this.temps--;
+                    this.timerEl.textContent = this.temps;
+
+                    if (this.temps <= 0) {
+                        this.arreter();
+                    }
+                }, 1000);
+            }
+
+            choisirNouveauGeste() {
+                const ancienGeste = this.gesteCible;
+                do {
+                    this.gesteCible = this.gestes[Math.floor(Math.random() * this.gestes.length)];
+                } while (this.gesteCible === ancienGeste && this.gestes.length > 1);
+
+                this.gesteActuelEl.textContent = this.gesteCible.emoji;
+                this.instructionEl.textContent = `Faites: ${this.gesteCible.nom}`;
+                this.instructionEl.classList.remove('reussi');
+            }
+
+            gesteReussi() {
+                const now = Date.now();
+                if (now - this.dernierGesteReussi < 2000) return; // Cooldown 2s
+
+                this.score += 10;
+                this.scoreEl.textContent = this.score;
+                this.dernierGesteReussi = now;
+
+                this.instructionEl.textContent = `✅ Bravo ! +10 points`;
+                this.instructionEl.classList.add('reussi');
+
+                setTimeout(() => {
+                    if (this.enCours) {
+                        this.choisirNouveauGeste();
+                    }
+                }, 1500);
+            }
+
+            // Fonctions de détection de gestes
+            estDoigtLeve(landmarks, doigtBase, doigtTip) {
+                // Un doigt est levé si le tip est au-dessus de la base (y plus petit)
+                return landmarks[doigtTip].y < landmarks[doigtBase].y - 0.05;
+            }
+
+            detecterMainOuverte(landmarks) {
+                // Tous les doigts sont levés
+                const pouce = this.estDoigtLeve(landmarks, 2, 4);
+                const index = this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
+                
+                return pouce && index && majeur && annulaire && auriculaire;
+            }
+
+            detecterPouceLeve(landmarks) {
+                // Seul le pouce est levé
+                const pouce = landmarks[4].y < landmarks[3].y;
+                const index = !this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = !this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
+                
+                return pouce && index && majeur && annulaire && auriculaire;
+            }
+
+            detecterVictory(landmarks) {
+                // Index et majeur levés, autres baissés
+                const pouce = !this.estDoigtLeve(landmarks, 2, 4);
+                const index = this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
+                
+                return index && majeur && annulaire && auriculaire;
+            }
+
+            detecterOK(landmarks) {
+                // Pouce et index se touchent (proximité)
+                const pouce = landmarks[4];
+                const index = landmarks[8];
+                const distance = Math.sqrt(
+                    Math.pow(pouce.x - index.x, 2) + 
+                    Math.pow(pouce.y - index.y, 2)
+                );
+                
+                const majeur = this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
+                
+                return distance < 0.05 && majeur && annulaire && auriculaire;
+            }
+
+            detecterPoing(landmarks) {
+                // Tous les doigts sont baissés
+                const pouce = !this.estDoigtLeve(landmarks, 2, 4);
+                const index = !this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = !this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
+                
+                return pouce && index && majeur && annulaire && auriculaire;
+            }
+
+            detecterRock(landmarks) {
+                // Index et auriculaire levés, autres baissés
+                const pouce = !this.estDoigtLeve(landmarks, 2, 4);
+                const index = this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = !this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
+                
+                return index && auriculaire && majeur && annulaire;
+            }
+
+            verifierGeste(landmarks) {
+                if (!this.gesteCible || !this.enCours) return;
+
+                const fonction = this.gesteCible.fonction;
+                const gesteDetecte = this[fonction](landmarks);
+
+                if (gesteDetecte) {
+                    const now = Date.now();
+                    if (this.gesteDetectionTime === 0) {
+                        this.gesteDetectionTime = now;
+                    } else if (now - this.gesteDetectionTime > 500) {
+                        // Geste maintenu pendant 500ms
+                        this.gesteReussi();
+                        this.gesteDetectionTime = 0;
+                    }
+                } else {
+                    this.gesteDetectionTime = 0;
+                }
+            }
+
+
+
+            traiterMains(results) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.handPoints.innerHTML = '';
+
+                // MediaPipe Hands utilise multiHandLandmarks (pas landmarks)
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    results.multiHandLandmarks.forEach((landmarks, index) => {
+                        // Dessiner les points des doigts
+                        this.dessinerMains(landmarks);
+                        
+                        // Vérifier le geste si le jeu est en cours
+                        if (this.enCours && index === 0) {
+                            this.verifierGeste(landmarks);
+                        }
+                    });
+                }
+            }
+
+            dessinerMains(landmarks) {
+                // Connexions principales
+                const connexions = [
+                    [0, 1], [1, 2], [2, 3], [3, 4],  // Pouce
+                    [0, 5], [5, 6], [6, 7], [7, 8],  // Index
+                    [0, 9], [9, 10], [10, 11], [11, 12], // Majeur
+                    [0, 13], [13, 14], [14, 15], [15, 16], // Annulaire
+                    [0, 17], [17, 18], [18, 19], [19, 20]  // Auriculaire
+                ];
+
+                // Couleurs pour chaque doigt
+                const couleurDoigts = {
+                    0: '#00ffff',  // Paume
+                    1: '#ff8800', 2: '#ff8800', 3: '#ff8800', 4: '#ff8800',  // Pouce
+                    5: '#ffff00', 6: '#ffff00', 7: '#ffff00', 8: '#ffff00',  // Index
+                    9: '#00ff00', 10: '#00ff00', 11: '#00ff00', 12: '#00ff00',  // Majeur
+                    13: '#00ffff', 14: '#00ffff', 15: '#00ffff', 16: '#00ffff',  // Annulaire
+                    17: '#ff00ff', 18: '#ff00ff', 19: '#ff00ff', 20: '#ff00ff'  // Auriculaire
+                };
+
+                // Dessiner les lignes (squelette)
+                this.ctx.lineWidth = 3;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+
+                connexions.forEach(([start, end]) => {
+                    const s = landmarks[start];
+                    const e = landmarks[end];
+
+                    if (s && e) {
+                        // Dégradé de couleur pour les lignes
+                        this.ctx.strokeStyle = couleurDoigts[end] || '#ff69b4';
+                        this.ctx.globalAlpha = 0.8;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(s.x * this.canvas.width, s.y * this.canvas.height);
+                        this.ctx.lineTo(e.x * this.canvas.width, e.y * this.canvas.height);
+                        this.ctx.stroke();
+                        
+                        this.ctx.globalAlpha = 1.0;
+                    }
+                });
+
+                // Dessiner les points (articulations)
+                landmarks.forEach((point, index) => {
+                    if (point) {
+                        const x = point.x * this.canvas.width;
+                        const y = point.y * this.canvas.height;
+
+                        // Couleur selon le point
+                        const couleur = couleurDoigts[index] || '#ff69b4';
+                        
+                        // Halo autour du point
+                        this.ctx.fillStyle = couleur;
+                        this.ctx.globalAlpha = 0.3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, 12, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        
+                        // Point principal
+                        this.ctx.globalAlpha = 1.0;
+                        this.ctx.fillStyle = couleur;
+                        this.ctx.strokeStyle = '#ffffff';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, 5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.stroke();
+                    }
+                });
+            }
+
+
+        }
+
+        // Lancer l'application
+        console.log('🚀 Application lancée');
+        const jeu = new JeuDoigts();
+    </script>
+
+    <!-- Navigation mini-jeux -->
+    <script src="/forum/nav-minijeux.js"></script>
+
+</body>
+</html>

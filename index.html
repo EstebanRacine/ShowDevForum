@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum des Métiers - Développement Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .conteneur {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #00ffaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sous-titre {
+            color: #aaa;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .grille-projets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .carte-projet {
+            background-color: #1e1e1e;
+            border-radius: 16px;
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carte-projet::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #00ffaa);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .carte-projet:hover {
+            border-color: #00d4ff;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.15);
+        }
+
+        .carte-projet:hover::before {
+            transform: scaleX(1);
+        }
+
+        .icone {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .carte-projet h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        .description {
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .caracteristiques {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .caracteristiques li {
+            padding: 8px 0;
+            color: #bbb;
+            border-bottom: 1px solid #333;
+            font-size: 0.9rem;
+        }
+
+        .caracteristiques li:last-child {
+            border-bottom: none;
+        }
+
+        .caracteristiques li::before {
+            content: '✓ ';
+            color: #00ffaa;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .bouton {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .bouton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .bouton:active {
+            transform: translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            color: #666;
+            padding-top: 40px;
+            border-top: 1px solid #333;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .sous-titre {
+                font-size: 1rem;
+            }
+
+            .grille-projets {
+                grid-template-columns: 1fr;
+            }
+
+            .carte-projet {
+                padding: 30px;
+            }
+
+            .carte-projet h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="conteneur">
+        <header>
+            <h1>🚀 Forum des Métiers</h1>
+            <p class="sous-titre">Découvrez le développement web via des démonstrations interactives</p>
+        </header>
+
+        <div class="grille-projets">
+            <!-- Projet 1 : Tri Algorithmique -->
+            <a href="./01-tri-algorithmique/" class="carte-projet">
+                <div class="icone">📊</div>
+                <h2>Visualiseur de Tri</h2>
+                <p class="description">
+                    Explorez comment les algorithmes trient les données en temps réel avec des animations visuelles spectaculaires.
+                </p>
+                <ul class="caracteristiques">
+                    <li>Bubble Sort animé</li>
+                    <li>Quick Sort avec récursion</li>
+                    <li>Contrôle de vitesse</li>
+                    <li>Visualisation en couleurs</li>
+                </ul>
+                <div class="bouton">Lancer l'application →</div>
+            </a>
+
+            <!-- Projet 2 : Détecteur IA -->
+            <a href="./02-ia-visage/" class="carte-projet">
+                <div class="icone">🤖</div>
+                <h2>Détecteur de Visage IA</h2>
+                <p class="description">
+                    Découvrez le Machine Learning avec MediaPipe en détectant vos points faciaux en temps réel.
+                </p>
+                <ul class="caracteristiques">
+                    <li>Détection 468 points faciaux</li>
+                    <li>Maillage néon animé</li>
+                    <li>Flux webcam en miroir</li>
+                    <li>Statistiques en direct (FPS)</li>
+                </ul>
+                <div class="bouton">Lancer l'application →</div>
+            </a>
+
+            <!-- Projet 3 : Quiz -->
+            <a href="./04-quiz-interactif/" class="carte-projet">
+                <div class="icone">🏆</div>
+                <h2>Quiz Interactif</h2>
+                <p class="description">
+                    Plongez dans une expérience immersive avec 10 thèmes visuels uniques, des animations fluides et des transitions captivantes.
+                </p>
+                <ul class="caracteristiques">
+                    <li>10 thèmes immersifs animés</li>
+                    <li>Transitions fluides entre questions</li>
+                    <li>Effets visuels et confettis</li>
+                    <li>Interface responsive et moderne</li>
+                </ul>
+                <div class="bouton">Lancer l'application →</div>
+            </a>
+
+            <!-- Projet 4 : Jeu des Gestes -->
+            <a href="./06-jeu-doigts/" class="carte-projet">
+                <div class="icone">✌️</div>
+                <h2>Jeu des Gestes</h2>
+                <p class="description">
+                    Reproduisez des gestes avec vos mains pour gagner des points ! Reconnaissance gestuelle en temps réel avec IA.
+                </p>
+                <ul class="caracteristiques">
+                    <li>Reconnaissance de 6 gestes différents</li>
+                    <li>Score et timer de 60 secondes</li>
+                    <li>Visualisation colorée des mains</li>
+                    <li>Fonctionne sur tous les navigateurs</li>
+                </ul>
+                <div class="bouton">Lancer l'application →</div>
+            </a>
+        </div>
+
+        <footer>
+            <p>💡 Quatre applications pour comprendre le développement web et l'intelligence artificielle</p>
+        </footer>
+    </div>
+</body>
+</html>

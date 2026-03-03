@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualiseur de Tri - Forum Métiers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .conteneur {
+            background-color: #1e1e1e;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sous-titre {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* Zone de visualisation des bâtons */
+        .zone-visualisation {
+            background-color: #0f0f0f;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 4px;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        .baton {
+            background-color: #00d4ff;
+            border-radius: 4px 4px 0 0;
+            transition: background-color 0.1s ease;
+            flex: 1;
+            min-width: 2px;
+        }
+
+        .baton.comparaison {
+            background-color: #ff3333; /* Rouge pour les comparaisons */
+        }
+
+        .baton.trie {
+            background-color: #00ff99; /* Vert pour les éléments triés */
+        }
+
+        /* Contrôles */
+        .controles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .groupe-controle {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 1rem;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .groupe-algo {
+            display: flex;
+            gap: 10px;
+        }
+
+        .groupe-algo button {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Curseur de vitesse */
+        .groupe-vitesse {
+            grid-column: 1 / 3;
+        }
+
+        .groupe-vitesse label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #aaa;
+        }
+
+        .conteneur-vitesse {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #333;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .valeur-vitesse {
+            color: #00d4ff;
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        /* Infos */
+        .infos {
+            background-color: #2a2a2a;
+            border-left: 4px solid #00d4ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .infos strong {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="conteneur">
+        <h1>Visualiseur de Tri</h1>
+        <p class="sous-titre">Découvrez comment les algorithmes trient les données en temps réel</p>
+
+        <!-- Zone de visualisation -->
+        <div class="zone-visualisation" id="zoneVisualisation"></div>
+
+        <!-- Contrôles -->
+        <div class="controles">
+            <div class="groupe-algo">
+                <button id="btnBubbleSort">Bubble Sort 🫧</button>
+                <button id="btnQuickSort">Quick Sort ⚡</button>
+            </div>
+            <button id="btnMelanger">Mélanger</button>
+
+            <div class="groupe-vitesse">
+                <label for="sliderVitesse">Vitesse de tri</label>
+                <div class="conteneur-vitesse">
+                    <input 
+                        type="range" 
+                        id="sliderVitesse" 
+                        min="1" 
+                        max="100" 
+                        value="50"
+                    >
+                    <span class="valeur-vitesse" id="valeurVitesse">50</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Infos -->
+        <div class="infos">
+            <strong>📚 Comment ça fonctionne ?</strong><br>
+            <strong style="color: #ff3333;">🔴 Rouge</strong> = Éléments en cours de comparaison<br>
+            <strong style="color: #00ff99;">🟢 Vert</strong> = Éléments correctement triés<br>
+            <strong style="color: #00d4ff;">🔵 Bleu</strong> = Éléments non encore triés
+        </div>
+    </div>
+
+    <script>
+        // ==================== CLASSE VISUALISEUR ====================
+        class Visualiseur {
+            constructor() {
+                // Éléments DOM
+                this.zoneViz = document.getElementById('zoneVisualisation');
+                this.btnBubble = document.getElementById('btnBubbleSort');
+                this.btnQuick = document.getElementById('btnQuickSort');
+                this.btnMelanger = document.getElementById('btnMelanger');
+                this.sliderVitesse = document.getElementById('sliderVitesse');
+                this.valeurVitesse = document.getElementById('valeurVitesse');
+
+                // Données
+                this.tableau = [];
+                this.tailleTableau = 50;
+                this.enCours = false;
+
+                // Initialisation
+                this.genererTableau();
+                this.afficherTableau();
+                this.attacherEvenements();
+            }
+
+            // Génère un tableau aléatoire de nombres
+            genererTableau() {
+                this.tableau = Array.from(
+                    { length: this.tailleTableau },
+                    () => Math.floor(Math.random() * 100) + 1
+                );
+            }
+
+            // Affiche les bâtons à l'écran
+            afficherTableau(indicesComparaison = [], indicesTries = []) {
+                this.zoneViz.innerHTML = '';
+                const max = Math.max(...this.tableau);
+
+                this.tableau.forEach((valeur, index) => {
+                    const baton = document.createElement('div');
+                    baton.className = 'baton';
+
+                    // Appliquer les classes CSS selon l'état
+                    if (indicesComparaison.includes(index)) {
+                        baton.classList.add('comparaison');
+                    } else if (indicesTries.includes(index)) {
+                        baton.classList.add('trie');
+                    }
+
+                    // Hauteur du bâton proportionnelle à sa valeur
+                    baton.style.height = (valeur / max) * 100 + '%';
+                    this.zoneViz.appendChild(baton);
+                });
+            }
+
+            // Récupère le délai basé sur le curseur de vitesse
+            obtenirDelai() {
+                const vitesse = parseInt(this.sliderVitesse.value);
+                return 101 - vitesse; // Inverse : vitesse 100 = délai minimum
+            }
+
+            // Attache les événements aux boutons
+            attacherEvenements() {
+                this.btnBubble.addEventListener('click', () => this.bubbleSort());
+                this.btnQuick.addEventListener('click', () => this.quickSort());
+                this.btnMelanger.addEventListener('click', () => this.melanger());
+                this.sliderVitesse.addEventListener('input', (e) => {
+                    this.valeurVitesse.textContent = e.target.value;
+                });
+            }
+
+            // Pause avec délai async
+            attendre(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            // ========== ALGORITHME BUBBLE SORT ==========
+            async bubbleSort() {
+                if (this.enCours) return;
+                this.enCours = true;
+                this.btnBubble.disabled = true;
+                this.btnQuick.disabled = true;
+                this.btnMelanger.disabled = true;
+
+                const n = this.tableau.length;
+
+                // Boucle externe : nombre de passes
+                for (let i = 0; i < n; i++) {
+                    // Boucle interne : comparaison des éléments contigus
+                    for (let j = 0; j < n - i - 1; j++) {
+                        // Afficher les éléments en cours de comparaison
+                        this.afficherTableau([j, j + 1], this.obtenirIndicesTries(n - i));
+                        await this.attendre(this.obtenirDelai());
+
+                        // Comparer et échanger si nécessaire
+                        if (this.tableau[j] > this.tableau[j + 1]) {
+                            [this.tableau[j], this.tableau[j + 1]] = 
+                            [this.tableau[j + 1], this.tableau[j]];
+                        }
+                    }
+                }
+
+                // Affiche le tableau complètement trié
+                this.afficherTableau([], Array.from({ length: n }, (_, i) => i));
+
+                // Réactiver les boutons
+                this.enCours = false;
+                this.btnBubble.disabled = false;
+                this.btnQuick.disabled = false;
+                this.btnMelanger.disabled = false;
+            }
+
+            // ========== ALGORITHME QUICK SORT ==========
+            async quickSort() {
+                if (this.enCours) return;
+                this.enCours = true;
+                this.btnBubble.disabled = true;
+                this.btnQuick.disabled = true;
+                this.btnMelanger.disabled = true;
+
+                const indicesTries = new Set();
+                
+                // Fonction récursive de quickSort
+                const quickSortRecursif = async (debut, fin) => {
+                    // Condition d'arrêt : tableau de taille 1 ou 0
+                    if (debut >= fin) return;
+
+                    // Partitionner le tableau
+                    const pivot = await this.partitionner(debut, fin, indicesTries);
+
+                    // Appels récursifs sur les sous-tableaux
+                    await quickSortRecursif(debut, pivot - 1);
+                    await quickSortRecursif(pivot + 1, fin);
+                };
+
+                await quickSortRecursif(0, this.tableau.length - 1);
+
+                // Affiche le tableau complètement trié
+                this.afficherTableau([], Array.from({ length: this.tableau.length }, (_, i) => i));
+
+                // Réactiver les boutons
+                this.enCours = false;
+                this.btnBubble.disabled = false;
+                this.btnQuick.disabled = false;
+                this.btnMelanger.disabled = false;
+            }
+
+            // Fonction de partitionnement pour Quick Sort
+            async partitionner(debut, fin, indicesTries) {
+                const pivot = this.tableau[fin];
+                let i = debut - 1;
+
+                for (let j = debut; j < fin; j++) {
+                    // Afficher les éléments en cours de comparaison
+                    this.afficherTableau([j, fin], Array.from(indicesTries));
+                    await this.attendre(this.obtenirDelai());
+
+                    if (this.tableau[j] < pivot) {
+                        i++;
+                        [this.tableau[i], this.tableau[j]] = 
+                        [this.tableau[j], this.tableau[i]];
+                    }
+                }
+
+                [this.tableau[i + 1], this.tableau[fin]] = 
+                [this.tableau[fin], this.tableau[i + 1]];
+                
+                // Marquer le pivot comme trié
+                indicesTries.add(i + 1);
+                
+                return i + 1;
+            }
+
+            // Obtient les indices des éléments triés (les derniers éléments)
+            obtenirIndicesTries(nombre) {
+                const n = this.tableau.length;
+                return Array.from({ length: nombre }, (_, i) => n - 1 - i);
+            }
+
+            // Mélange le tableau
+            melanger() {
+                if (this.enCours) return;
+                
+                // Fisher-Yates shuffle : mélange aléatoire équitable
+                for (let i = this.tableau.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.tableau[i], this.tableau[j]] = 
+                    [this.tableau[j], this.tableau[i]];
+                }
+                
+                this.afficherTableau();
+            }
+        }
+
+        // Initialiser l'application au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            new Visualiseur();
+        });
+    </script>
+
+    <!-- Navigation mini-jeux -->
+    <script src="/forum/nav-minijeux.js"></script>
+
+</body>
+</html>

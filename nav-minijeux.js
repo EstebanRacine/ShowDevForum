@@ -1,0 +1,558 @@
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * COMPOSANT NAVIGATION MINI-JEUX
+ * À importer dans chaque mini-jeu avec :
+ * <script src="/forum/nav-minijeux.js"></script>
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+(function() {
+    'use strict';
+
+    // Attendre que le DOM soit chargé
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    function init() {
+        injecterHTML();
+        injecterCSS();
+        initialiserNavigation();
+    }
+
+    function injecterHTML() {
+        const html = `
+        <div id="nav-minijeux">
+            <!-- Bouton flottant discret -->
+            <button id="nav-trigger" aria-label="Navigation mini-jeux">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="12" cy="5" r="1"/>
+                    <circle cx="12" cy="19" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="7" cy="7" r="1"/>
+                    <circle cx="17" cy="17" r="1"/>
+                    <circle cx="7" cy="17" r="1"/>
+                    <circle cx="17" cy="7" r="1"/>
+                </svg>
+            </button>
+
+            <!-- Overlay menu -->
+            <div id="nav-overlay" class="nav-hidden">
+                <!-- Backdrop blur -->
+                <div class="nav-backdrop"></div>
+
+                <!-- Menu content -->
+                <div class="nav-menu">
+                    <!-- Header avec close button -->
+                    <div class="nav-header">
+                        <h2>Mini-Jeux</h2>
+                        <button id="nav-close" aria-label="Fermer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Grille des mini-jeux -->
+                    <div class="nav-grid">
+                        <a href="/forum/" class="nav-item nav-home" data-index="0">
+                            <div class="nav-icon">🏠</div>
+                            <h3>Accueil</h3>
+                            <p>Retour au menu principal</p>
+                        </a>
+
+                        <a href="/forum/01-tri-algorithmique/" class="nav-item" data-index="1">
+                            <div class="nav-icon">📊</div>
+                            <h3>Visualiseur de Tri</h3>
+                            <p>Algorithmes de tri animés</p>
+                        </a>
+
+                        <a href="/forum/02-ia-visage/" class="nav-item" data-index="2">
+                            <div class="nav-icon">🤖</div>
+                            <h3>Détecteur IA</h3>
+                            <p>Reconnaissance faciale temps réel</p>
+                        </a>
+
+                        <a href="/forum/04-quiz-interactif/" class="nav-item" data-index="3">
+                            <div class="nav-icon">🏆</div>
+                            <h3>Quiz Interactif</h3>
+                            <p>10 thèmes immersifs</p>
+                        </a>
+
+                        <a href="/forum/06-jeu-doigts/" class="nav-item" data-index="4">
+                            <div class="nav-icon">✌️</div>
+                            <h3>Jeu des Gestes</h3>
+                            <p>Reconnaissance gestuelle IA</p>
+                        </a>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="nav-footer">
+                        <p>Appuyez sur <kbd>Échap</kbd> pour fermer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+    }
+
+    function injecterCSS() {
+        const css = `
+        /* ═══════════════════════════════════════════════════════════════
+           STYLES NAVIGATION MINI-JEUX
+           ═══════════════════════════════════════════════════════════════ */
+
+        #nav-minijeux {
+            --nav-primary: #00d4ff;
+            --nav-secondary: #00ffaa;
+            --nav-dark: #0a0a0a;
+            --nav-darker: #050505;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Bouton flottant trigger
+           ───────────────────────────────────────────────────────────── */
+        #nav-trigger {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--nav-primary), var(--nav-secondary));
+            color: var(--nav-darker);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 9998;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #nav-trigger svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        #nav-trigger:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 48px rgba(0, 212, 255, 0.6),
+                        0 0 0 8px rgba(0, 212, 255, 0.1);
+        }
+
+        #nav-trigger:active {
+            transform: scale(0.95) rotate(90deg);
+        }
+
+        /* Animation pulse subtile */
+        @keyframes navPulse {
+            0%, 100% {
+                box-shadow: 0 8px 32px rgba(0, 212, 255, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(0, 212, 255, 0.6),
+                            0 0 0 12px rgba(0, 212, 255, 0.05);
+            }
+        }
+
+        #nav-trigger {
+            animation: navPulse 3s ease-in-out infinite;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Overlay full-screen
+           ───────────────────────────────────────────────────────────── */
+        #nav-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #nav-overlay.nav-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Backdrop avec blur */
+        .nav-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(24px) saturate(180%);
+            transition: backdrop-filter 0.5s ease;
+        }
+
+        #nav-overlay:not(.nav-hidden) .nav-backdrop {
+            backdrop-filter: blur(24px) saturate(180%);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Menu principal
+           ───────────────────────────────────────────────────────────── */
+        .nav-menu {
+            position: relative;
+            max-width: 1200px;
+            width: 90%;
+            max-height: 90vh;
+            background: linear-gradient(135deg, 
+                rgba(15, 15, 25, 0.95) 0%, 
+                rgba(20, 20, 35, 0.95) 100%);
+            border-radius: 32px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 32px 128px rgba(0, 0, 0, 0.8),
+                        0 0 0 1px rgba(255, 255, 255, 0.05),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            transform: scale(1);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto;
+        }
+
+        #nav-overlay.nav-hidden .nav-menu {
+            transform: scale(0.8);
+        }
+
+        /* Header */
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--nav-primary), var(--nav-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        #nav-close {
+            width: 3rem;
+            height: 3rem;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #nav-close svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        #nav-close:hover {
+            background: rgba(255, 50, 50, 0.15);
+            color: #ff5555;
+            border-color: rgba(255, 50, 50, 0.3);
+            transform: rotate(90deg);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Grille des mini-jeux
+           ───────────────────────────────────────────────────────────── */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .nav-item {
+            position: relative;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.03) 0%, 
+                rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: navItemSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes navItemSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Délai échelonné pour chaque item */
+        .nav-item[data-index="0"] { animation-delay: 0.05s; }
+        .nav-item[data-index="1"] { animation-delay: 0.1s; }
+        .nav-item[data-index="2"] { animation-delay: 0.15s; }
+        .nav-item[data-index="3"] { animation-delay: 0.2s; }
+        .nav-item[data-index="4"] { animation-delay: 0.25s; }
+
+        /* Effet de survol */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 255, 0.1) 0%, 
+                rgba(0, 255, 170, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 212, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2),
+                        0 0 0 1px rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+
+        /* Icône emoji */
+        .nav-icon {
+            font-size: 3.5rem;
+            width: 5rem;
+            height: 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 255, 0.1) 0%, 
+                rgba(0, 255, 170, 0.1) 100%);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-item:hover .nav-icon {
+            transform: scale(1.15) rotate(5deg);
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        /* Texte */
+        .nav-item h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-item p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            line-height: 1.5;
+        }
+
+        /* Style spécial pour l'accueil */
+        .nav-home {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            justify-content: flex-start;
+            gap: 1.5rem;
+        }
+
+        .nav-home .nav-icon {
+            flex-shrink: 0;
+        }
+
+        .nav-home h3,
+        .nav-home p {
+            text-align: left;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Footer
+           ───────────────────────────────────────────────────────────── */
+        .nav-footer {
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(0, 212, 255, 0.1);
+            text-align: center;
+        }
+
+        .nav-footer p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .nav-footer kbd {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 0.25rem 0.6rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--nav-primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           Responsive
+           ───────────────────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            #nav-trigger {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 3rem;
+                height: 3rem;
+            }
+
+            .nav-menu {
+                padding: 2rem 1.5rem;
+                border-radius: 24px;
+                width: 95%;
+            }
+
+            .nav-header h2 {
+                font-size: 2rem;
+            }
+
+            #nav-close {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .nav-item {
+                padding: 1.5rem;
+            }
+
+            .nav-icon {
+                font-size: 2.5rem;
+                width: 4rem;
+                height: 4rem;
+            }
+
+            .nav-home {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-menu {
+                padding: 1.5rem;
+            }
+
+            .nav-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+        `;
+
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+
+    function initialiserNavigation() {
+        const trigger = document.getElementById('nav-trigger');
+        const overlay = document.getElementById('nav-overlay');
+        const closeBtn = document.getElementById('nav-close');
+        const backdrop = overlay.querySelector('.nav-backdrop');
+
+        // Ouvrir le menu
+        function openNav() {
+            overlay.classList.remove('nav-hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Animation du bouton trigger
+            trigger.style.transform = 'scale(0.8) rotate(180deg)';
+            trigger.style.opacity = '0';
+        }
+
+        // Fermer le menu
+        function closeNav() {
+            overlay.classList.add('nav-hidden');
+            document.body.style.overflow = '';
+            
+            // Reset bouton trigger
+            trigger.style.transform = '';
+            trigger.style.opacity = '';
+        }
+
+        // Event listeners
+        trigger.addEventListener('click', openNav);
+        closeBtn.addEventListener('click', closeNav);
+        backdrop.addEventListener('click', closeNav);
+
+        // Fermeture avec Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !overlay.classList.contains('nav-hidden')) {
+                closeNav();
+            }
+        });
+
+        // Empêcher la propagation des clics dans le menu
+        overlay.querySelector('.nav-menu').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Animation des items au survol
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.zIndex = '';
+            });
+        });
+    }
+
+})();
