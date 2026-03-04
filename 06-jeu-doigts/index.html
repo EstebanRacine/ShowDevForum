@@ -60,11 +60,14 @@
             overflow: hidden;
             border: 2px solid rgba(255, 20, 147, 0.3);
             width: 100%;
+            max-width: 600px;
+            aspect-ratio: 640 / 480;
+            margin: 0 auto;
         }
 
         #video {
             width: 100%;
-            height: 480px;
+            height: 100%;
             display: block;
             transform: scaleX(-1);
         }
@@ -292,9 +295,177 @@
                 font-size: 1.8em;
             }
         }
+
+        /* Modale de fin */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a3e 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid #ff1493;
+            box-shadow: 0 20px 60px rgba(255, 20, 147, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-content h2 {
+            font-size: 2.5em;
+            color: #ff1493;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: #00ff00;
+            margin: 30px 0;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .score-label {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            flex: 1;
+        }
+
+        .btn-recommencer {
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            color: white;
+        }
+
+        .btn-recommencer:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 20, 147, 0.4);
+        }
+
+        .btn-accueil {
+            background: rgba(255, 20, 147, 0.2);
+            color: #ff69b4;
+            border: 2px solid #ff69b4;
+        }
+
+        .btn-accueil:hover {
+            background: rgba(255, 20, 147, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Overlay de chargement MediaPipe */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            border-radius: 15px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 30px;
+            border: 4px solid rgba(255, 20, 147, 0.2);
+            border-top-color: #ff1493;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-content h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #ff69b4;
+        }
+
+        .loading-content p {
+            font-size: 1em;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
+    <!-- Modale de fin du jeu -->
+    <div id="modalFin" class="modal-overlay">
+        <div class="modal-content">
+            <h2>🎉 Jeu Terminé !</h2>
+            <div class="score-label">Votre Score</div>
+            <div class="score-display" id="scoreFinal">0</div>
+            <div class="modal-buttons">
+                <button class="btn-recommencer" id="btnRecommencer">🔄 Recommencer</button>
+                <button class="btn-accueil" onclick="window.location.href='/forum/'">🏠 Accueil</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>✌️ Jeu des Gestes</h1>
         <p class="subtitle">Reproduisez les gestes avec vos mains pour gagner des points !</p>
@@ -313,6 +484,14 @@
                 <div id="gameBoard"></div>
                 <div class="hand-points" id="handPoints"></div>
                 <div class="geste-instruction" id="instruction">Faites: 👋 Main ouverte</div>
+                <!-- Overlay de chargement MediaPipe -->
+                <div id="loadingOverlay" class="loading-overlay">
+                    <div class="loading-content">
+                        <div class="spinner"></div>
+                        <h3>⏳ Initialisation du modèle MediaPipe</h3>
+                        <p>Veuillez patienter quelques secondes...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -336,7 +515,8 @@
             • Cliquez sur "Démarrer" pour lancer le jeu (60 secondes)<br>
             • Reproduisez le geste affiché avec votre main<br>
             • Gagnez 10 points par geste réussi<br>
-            • Gestes: 👋 Main ouverte, 👍 Pouce levé, ✌️ Victory, 👌 OK, ✊ Poing, 🤘 Rock
+            • Gestes simples: 👋 👍 👎 ✌️ 👌 ✊ 🤘 🤙 🔫 ☚ 3️⃣ 4️⃣<br>
+            • Gestes 2 mains: ❤️ 📷 🙌
         </div>
     </div>
 
@@ -361,6 +541,9 @@
                 this.timerEl = document.getElementById('timer');
                 this.gesteActuelEl = document.getElementById('gesteActuel');
                 this.instructionEl = document.getElementById('instruction');
+                this.modalFinEl = document.getElementById('modalFin');
+                this.loadingOverlayEl = document.getElementById('loadingOverlay');
+                this.scoreFinalEl = document.getElementById('scoreFinal');
 
                 // État du jeu
                 this.enCours = false;
@@ -372,15 +555,29 @@
                 this.intervalTimer = null;
                 this.gesteDetectionTime = 0;
                 this.dernierGesteReussi = 0;
+                this.dureeMaintienParGeste = {
+                    detecterShaka: 300,
+                    detecterTroisDoigts: 300,
+                    detecterQuatreDoigts: 300
+                };
 
                 // Liste des gestes possibles
                 this.gestes = [
                     { nom: '👋 Main ouverte', emoji: '👋', fonction: 'detecterMainOuverte' },
                     { nom: '👍 Pouce levé', emoji: '👍', fonction: 'detecterPouceLeve' },
+                    { nom: '👎 Pouce baissé', emoji: '👎', fonction: 'detecterPouceBarsse' },
                     { nom: '✌️ Victory', emoji: '✌️', fonction: 'detecterVictory' },
                     { nom: '👌 OK', emoji: '👌', fonction: 'detecterOK' },
                     { nom: '✊ Poing fermé', emoji: '✊', fonction: 'detecterPoing' },
-                    { nom: '🤘 Rock', emoji: '🤘', fonction: 'detecterRock' }
+                    { nom: '🤘 Rock', emoji: '🤘', fonction: 'detecterRock' },
+                    { nom: '🤙 Appel', emoji: '🤙', fonction: 'detecterShaka' },
+                    { nom: '🔫 Pistolet', emoji: '🔫', fonction: 'detecterPistolet' },
+                    { nom: '☚ Pointage', emoji: '☚', fonction: 'detecterPointage' },
+                    { nom: '3️⃣ Trois doigts', emoji: '3️⃣', fonction: 'detecterTroisDoigts' },
+                    { nom: '4️⃣ Quatre doigts', emoji: '4️⃣', fonction: 'detecterQuatreDoigts' },
+                    { nom: '❤️ Cœur', emoji: '❤️', fonction: 'detecterCoeur' },
+                    { nom: '📷 Carré', emoji: '📷', fonction: 'detecterCarre' },
+                    { nom: '🙌 Mains levées', emoji: '🙌', fonction: 'detecterMainsLevees' }
                 ];
                 this.gesteCible = null;
                 this.intervalTimer = null;
@@ -402,24 +599,24 @@
             mettreAJourEtat(classe, texte) {
                 this.statusEl.className = `status ${classe}`;
                 this.statusEl.textContent = texte;
-                console.log(texte);
+                // console.log(texte);
             }
 
             initialiserMediaPipe() {
                 const verifier = setInterval(() => {
                     if (window.Hands && window.Camera) {
                         clearInterval(verifier);
-                        console.log('✅ MediaPipe Hands et Camera détectés');
+                        // console.log('✅ MediaPipe Hands et Camera détectés');
 
                         try {
-                            console.log('🚀 Création instance Hands...');
+                            // console.log('🚀 Création instance Hands...');
                             this.mains = new Hands({
                                 locateFile: (file) => {
                                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
                                 }
                             });
 
-                            console.log('⚙️ Configuration Hands...');
+                            // console.log('⚙️ Configuration Hands...');
                             this.mains.setOptions({
                                 maxNumHands: 2,
                                 modelComplexity: 1,
@@ -427,13 +624,21 @@
                                 minTrackingConfidence: 0.5
                             });
 
-                            console.log('📌 Enregistrement callback...');
+                            // console.log('📌 Enregistrement callback...');
                             this.mains.onResults((results) => {
-                                console.log('🎯 Callback onResults reçu!', results);
-                                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                                    console.log(`👋 ${results.multiHandLandmarks.length} main(s) détectée(s)`);
-                                } else {
-                                    console.log('❌ Aucune main détectée');
+                                // console.log('🎯 Callback onResults reçu!', results);
+                                // if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                                //     console.log(`👋 ${results.multiHandLandmarks.length} main(s) détectée(s)`);
+                                // } else {
+                                //     console.log('❌ Aucune main détectée');
+                                // }
+                                // Masquer l'overlay de chargement au premier résultat et démarrer le timer
+                                if (!this.mediaPixInitialise) {
+                                    this.mediaPixInitialise = true;
+                                    this.loadingOverlayEl.classList.remove('active');
+                                    if (this.enCours) {
+                                        this.demarrerTimer();
+                                    }
                                 }
                                 this.traiterMains(results);
                             });
@@ -450,6 +655,10 @@
             attacherEvenements() {
                 this.btnDemarrer.addEventListener('click', () => this.demarrer());
                 this.btnArreter.addEventListener('click', () => this.arreter());
+                document.getElementById('btnRecommencer').addEventListener('click', () => {
+                    document.getElementById('modalFin').classList.remove('active');
+                    this.demarrer();
+                });
             }
 
             async demarrer() {
@@ -459,7 +668,9 @@
                     return;
                 }
 
-                console.log('🎮 Démarrage du jeu...');
+                this.modalFinEl.classList.remove('active');
+
+                // console.log('🎮 Démarrage du jeu...');
                 this.mettreAJourEtat('attente', '⏳ Accès caméra...');
 
                 try {
@@ -484,6 +695,10 @@
                             height: 480
                         });
 
+                        // Afficher l'overlay de chargement
+                        this.loadingOverlayEl.classList.add('active');
+                        this.mediaPixInitialise = false;
+
                         this.camera.start();
                         this.enCours = true;
                         this.score = 0;
@@ -495,7 +710,6 @@
                         this.btnArreter.disabled = false;
 
                         this.choisirNouveauGeste();
-                        this.demarrerTimer();
                         this.mettreAJourEtat('ok', '🎮 JEU EN COURS - Reproduisez le geste !');
                     };
                 } catch (erreur) {
@@ -524,6 +738,9 @@
 
                 this.btnDemarrer.disabled = false;
                 this.btnArreter.disabled = true;
+
+                this.scoreFinalEl.textContent = this.score;
+                this.modalFinEl.classList.add('active');
 
                 this.mettreAJourEtat('ok', `🎉 Jeu terminé ! Score final: ${this.score}`);
             }
@@ -565,13 +782,84 @@
                     if (this.enCours) {
                         this.choisirNouveauGeste();
                     }
-                }, 1500);
+                }, 800);
             }
 
             // Fonctions de détection de gestes
             estDoigtLeve(landmarks, doigtBase, doigtTip) {
                 // Un doigt est levé si le tip est au-dessus de la base (y plus petit)
                 return landmarks[doigtTip].y < landmarks[doigtBase].y - 0.05;
+            }
+
+            estDoigtTendu(hand, fingerIndices, ratioMin = 1.5) {
+                // Détection orientation-indépendante:
+                // un doigt est tendu si la distance MCP->TIP est nettement > MCP->PIP
+                const [mcp, pip, tip] = fingerIndices;
+                const distMcpTip = this.longueur3D(hand[mcp], hand[tip]);
+                const distMcpPip = this.longueur3D(hand[mcp], hand[pip]);
+                return distMcpTip > distMcpPip * ratioMin;
+            }
+
+            estDoigtReplie(hand, fingerIndices, ratioMax = 1.35) {
+                const [mcp, pip, tip] = fingerIndices;
+                const distMcpTip = this.longueur3D(hand[mcp], hand[tip]);
+                const distMcpPip = this.longueur3D(hand[mcp], hand[pip]);
+                return distMcpTip <= distMcpPip * ratioMax;
+            }
+
+            distance2D(a, b) {
+                return Math.hypot(a.x - b.x, a.y - b.y);
+            }
+
+            longueur3D(a, b) {
+                const az = a.z || 0;
+                const bz = b.z || 0;
+                return Math.hypot(a.x - b.x, a.y - b.y, az - bz);
+            }
+
+            estDoigtPlieVersPoignet(landmarks, tipIndex, pipIndex) {
+                const poignet = landmarks[0];
+                const tip = landmarks[tipIndex];
+                const pip = landmarks[pipIndex];
+                return this.longueur3D(poignet, tip) < this.longueur3D(poignet, pip);
+            }
+
+            angleDegres(a, b, c) {
+                const abx = a.x - b.x;
+                const aby = a.y - b.y;
+                const cbx = c.x - b.x;
+                const cby = c.y - b.y;
+
+                const dot = abx * cbx + aby * cby;
+                const abNorm = Math.hypot(abx, aby);
+                const cbNorm = Math.hypot(cbx, cby);
+                const denom = Math.max(abNorm * cbNorm, 0.0001);
+                const cosTheta = Math.min(1, Math.max(-1, dot / denom));
+                return Math.acos(cosTheta) * (180 / Math.PI);
+            }
+
+            verifierFormeL(hand) {
+                // Index/pouce tendus (orientation-indépendante),
+                // autres doigts repliés et angle index/pouce proche d'un angle droit.
+                const indexTendu = this.estDoigtTendu(hand, [5, 6, 8], 1.35);
+                const pouceTendu = this.estDoigtTendu(hand, [1, 2, 4], 1.1);
+
+                const majeurFerme = this.estDoigtPlieVersPoignet(hand, 12, 10);
+                const annulaireFerme = this.estDoigtPlieVersPoignet(hand, 16, 14);
+                const auriculaireFerme = this.estDoigtPlieVersPoignet(hand, 20, 18);
+                const resteFerme = majeurFerme && annulaireFerme && auriculaireFerme;
+
+                // Angle au MCP de l'index entre direction index et direction pouce
+                const angleIndexPouce = this.angleDegres(hand[8], hand[5], hand[4]);
+                const anglePresqueDroit = angleIndexPouce >= 35 && angleIndexPouce <= 145;
+
+                return {
+                    ok: indexTendu && pouceTendu && resteFerme && anglePresqueDroit,
+                    indexTendu,
+                    pouceTendu,
+                    resteFerme,
+                    angleIndexPouce
+                };
             }
 
             detecterMainOuverte(landmarks) {
@@ -582,7 +870,9 @@
                 const annulaire = this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
                 
-                return pouce && index && majeur && annulaire && auriculaire;
+                const resultat = pouce && index && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ MAIN OUVERTE détectée:', {pouce, index, majeur, annulaire, auriculaire});
+                return resultat;
             }
 
             detecterPouceLeve(landmarks) {
@@ -593,7 +883,9 @@
                 const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
                 
-                return pouce && index && majeur && annulaire && auriculaire;
+                const resultat = pouce && index && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ POUCE LEVÉ détecté:', {pouce, index, majeur, annulaire, auriculaire});
+                return resultat;
             }
 
             detecterVictory(landmarks) {
@@ -604,7 +896,9 @@
                 const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
                 
-                return index && majeur && annulaire && auriculaire;
+                const resultat = index && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ VICTORY détecté:', {index, majeur, annulaire, auriculaire});
+                return resultat;
             }
 
             detecterOK(landmarks) {
@@ -620,7 +914,9 @@
                 const annulaire = this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
                 
-                return distance < 0.05 && majeur && annulaire && auriculaire;
+                const resultat = distance < 0.05 && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ OK détecté:', {distance: distance.toFixed(4), majeur, annulaire, auriculaire});
+                return resultat;
             }
 
             detecterPoing(landmarks) {
@@ -631,7 +927,9 @@
                 const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
                 
-                return pouce && index && majeur && annulaire && auriculaire;
+                const resultat = pouce && index && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ POING détecté:', {pouce, index, majeur, annulaire, auriculaire});
+                return resultat;
             }
 
             detecterRock(landmarks) {
@@ -642,21 +940,265 @@
                 const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
                 const auriculaire = this.estDoigtLeve(landmarks, 17, 20);
                 
-                return index && auriculaire && majeur && annulaire;
+                const resultat = index && auriculaire && majeur && annulaire;
+                // if (resultat) console.log('✅ ROCK détecté:', {index, auriculaire, majeur, annulaire});
+                return resultat;
             }
 
-            verifierGeste(landmarks) {
+            detecterPouceBarsse(landmarks) {
+                // Pouce seul baissé (vers le bas)
+                const pouce = landmarks[4].y > landmarks[3].y;
+                const index = !this.estDoigtLeve(landmarks, 5, 8);
+                const majeur = !this.estDoigtLeve(landmarks, 9, 12);
+                const annulaire = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaire = !this.estDoigtLeve(landmarks, 17, 20);
+                
+                const resultat = pouce && index && majeur && annulaire && auriculaire;
+                // if (resultat) console.log('✅ POUCE BAISSÉ détecté:', {pouce, index, majeur, annulaire, auriculaire});
+                return resultat;
+            }
+
+            detecterPistolet(landmarks) {
+                // Index tendu, pouce tendu (haut OU latéral), autres doigts repliés (majeur peut être deployé ou replié)
+                const indexEtendu = this.estDoigtTendu(landmarks, [5, 6, 8], 1.45);
+                const pouceTendu = this.estDoigtTendu(landmarks, [1, 2, 4], 1.2);
+                const pouceOriente = (landmarks[4].y < landmarks[2].y - 0.02) || (Math.abs(landmarks[4].x - landmarks[2].x) > 0.05);
+
+                const annulairePlie = this.estDoigtReplie(landmarks, [13, 14, 16], 1.3) || this.estDoigtPlieVersPoignet(landmarks, 16, 14);
+                const auriculairePlie = this.estDoigtReplie(landmarks, [17, 18, 20], 1.3) || this.estDoigtPlieVersPoignet(landmarks, 20, 18);
+
+                const resultat = indexEtendu && pouceTendu && pouceOriente && annulairePlie && auriculairePlie;
+                // if (resultat) console.log('✅ PISTOLET détecté:', { indexEtendu, pouceTendu, pouceOriente, annulairePlie, auriculairePlie });
+                return resultat;
+            }
+
+            detecterPointage(landmarks) {
+                // Pointage: index étendu + autres doigts repliés,
+                // avec support du pointage vers l'avant (auto-occultation caméra)
+                const indexEtendu = this.estDoigtTendu(landmarks, [5, 6, 8], 1.45);
+                const majeurPlie = this.estDoigtReplie(landmarks, [9, 10, 12], 1.3) || this.estDoigtPlieVersPoignet(landmarks, 12, 10);
+                const annulairePlie = this.estDoigtReplie(landmarks, [13, 14, 16], 1.3) || this.estDoigtPlieVersPoignet(landmarks, 16, 14);
+                const auriculairePlie = this.estDoigtReplie(landmarks, [17, 18, 20], 1.3) || this.estDoigtPlieVersPoignet(landmarks, 20, 18);
+                const autresDoigtsOK = majeurPlie && annulairePlie && auriculairePlie;
+
+                const indexMcp = landmarks[5];
+                const indexPip = landmarks[6];
+                const indexTip = landmarks[8];
+
+                const longueurIndex2D = this.distance2D(indexMcp, indexTip);
+                const longueurRef2D = this.distance2D(indexMcp, indexPip);
+                const ratioLongueur = longueurIndex2D / Math.max(longueurRef2D, 0.0001);
+
+                // Pointage classique (latéral/devant la caméra mais visible en 2D)
+                const pointageClassique = indexEtendu && ratioLongueur > 1.45;
+
+                // Pointage vers la caméra: index semble court en 2D mais avance en profondeur (z)
+                const deltaZTipPip = Math.abs((indexTip.z || 0) - (indexPip.z || 0));
+                const pointageAvantCamera = indexEtendu && ratioLongueur <= 1.45 && deltaZTipPip > 0.08;
+
+                const resultat = autresDoigtsOK && (pointageClassique || pointageAvantCamera);
+                // if (resultat) {
+                //     console.log('✅ POINTAGE détecté:', {
+                //         indexEtendu,
+                //         autresDoigtsOK,
+                //         ratioLongueur: ratioLongueur.toFixed(2),
+                //         deltaZTipPip: deltaZTipPip.toFixed(3),
+                //         mode: pointageAvantCamera ? 'avant-caméra' : 'classique'
+                //     });
+                // }
+                return resultat;
+            }
+
+            detecterCoeur(results) {
+                // Cœur forme 1: deux mains, index tips proches + thumbs tips proches
+                // Cœur forme 2: une main, pouce/index croisés (tips proches)
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+                    return false;
+                }
+
+                const mains = results.multiHandLandmarks;
+
+                if (mains.length >= 2) {
+                    const main1 = mains[0];
+                    const main2 = mains[1];
+
+                    const distanceIndexTips = this.distance2D(main1[8], main2[8]);
+                    const distanceThumbTips = this.distance2D(main1[4], main2[4]);
+
+                    const coeurDeuxMains = distanceIndexTips < 0.12 && distanceThumbTips < 0.12;
+                    if (coeurDeuxMains) {
+                        return true;
+                    }
+                }
+
+                const main = mains[0];
+                const distancePouceIndex = this.distance2D(main[4], main[8]);
+                const indexEtMajeurTendus = this.estDoigtTendu(main, [5, 6, 8], 1.45) && this.estDoigtTendu(main, [9, 10, 12], 1.4);
+                const coeurUneMain = distancePouceIndex < 0.06 && indexEtMajeurTendus;
+
+                // if (coeurUneMain) {
+                //     console.log('✅ CŒUR (1 main, pouce/index croisés) détecté:', {
+                //         distancePouceIndex: distancePouceIndex.toFixed(3)
+                //     });
+                // }
+
+                return coeurUneMain;
+            }
+
+            detecterCarre(results) {
+                // Geste "cadre réalisateur": 2 mains en L + coins croisés rapprochés
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length < 2) {
+                    return false;
+                }
+
+                const mainA = results.multiHandLandmarks[0];
+                const mainB = results.multiHandLandmarks[1];
+
+                const formeA = this.verifierFormeL(mainA);
+                const formeB = this.verifierFormeL(mainB);
+
+                if (!(formeA.ok && formeB.ok)) {
+                    return false;
+                }
+
+                // Tolérances robustes pour webcam
+                const seuilCoin = 0.12;
+
+                // Configuration 1
+                const distHaut1 = this.distance2D(mainA[8], mainB[4]);
+                const distBas1 = this.distance2D(mainA[4], mainB[8]);
+                const coinsCfg1 = distHaut1 < seuilCoin && distBas1 < seuilCoin;
+
+                // Configuration 2 (inversion des mains)
+                const distHaut2 = this.distance2D(mainB[8], mainA[4]);
+                const distBas2 = this.distance2D(mainB[4], mainA[8]);
+                const coinsCfg2 = distHaut2 < seuilCoin && distBas2 < seuilCoin;
+
+                const resultat = coinsCfg1 || coinsCfg2;
+
+                return resultat;
+            }
+
+            detecterShaka(landmarks) {
+                // Shaka/Appel = Pouce + auriculaire tendus, autres doigts repliés
+                const pouceLeve = this.estDoigtLeve(landmarks, 2, 4) || this.estDoigtTendu(landmarks, [1, 2, 4], 1.1);
+                const indexPlie = !this.estDoigtLeve(landmarks, 5, 8) || this.estDoigtReplie(landmarks, [5, 6, 8], 1.45);
+                const majeurPlie = !this.estDoigtLeve(landmarks, 9, 12) || this.estDoigtReplie(landmarks, [9, 10, 12], 1.45);
+                const annulairePlie = !this.estDoigtLeve(landmarks, 13, 16) || this.estDoigtReplie(landmarks, [13, 14, 16], 1.45);
+                const auriculaireLeve = this.estDoigtLeve(landmarks, 17, 20) || this.estDoigtTendu(landmarks, [17, 18, 20], 1.2);
+                
+                return pouceLeve && indexPlie && majeurPlie && annulairePlie && auriculaireLeve;
+            }
+
+            detecterTroisDoigts(landmarks) {
+                // Trois doigts = Pouce + index + majeur levés, annulaire + auriculaire baissés
+                const pouceLeve = this.estDoigtLeve(landmarks, 2, 4);
+                const indexLeve = this.estDoigtLeve(landmarks, 5, 8);
+                const majeurLeve = this.estDoigtLeve(landmarks, 9, 12);
+                const annulaireBaisse = !this.estDoigtLeve(landmarks, 13, 16);
+                const auriculaireBaisse = !this.estDoigtLeve(landmarks, 17, 20);
+
+                const resultat = pouceLeve && indexLeve && majeurLeve && annulaireBaisse && auriculaireBaisse;
+
+                return resultat;
+            }
+
+            detecterQuatreDoigts(landmarks) {
+                // Quatre doigts = Index, majeur, annulaire, auriculaire tendus (paume OU dos de main)
+                // Pouce ignoré pour éviter les faux négatifs selon l'orientation
+                const indexLeve = this.estDoigtLeve(landmarks, 5, 8) || this.estDoigtTendu(landmarks, [5, 6, 8], 1.35);
+                const majeurLeve = this.estDoigtLeve(landmarks, 9, 12) || this.estDoigtTendu(landmarks, [9, 10, 12], 1.35);
+                const annulaireLeve = this.estDoigtLeve(landmarks, 13, 16) || this.estDoigtTendu(landmarks, [13, 14, 16], 1.35);
+                const auriculaireLeve = this.estDoigtLeve(landmarks, 17, 20) || this.estDoigtTendu(landmarks, [17, 18, 20], 1.35);
+
+                const resultat = indexLeve && majeurLeve && annulaireLeve && auriculaireLeve;
+
+                return resultat;
+            }
+
+            detecterMerci(results) {
+                // Merci/Prière = 2 mains collées, paumes face à face, doigts levés
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length < 2) {
+                    return false;
+                }
+
+                const main1 = results.multiHandLandmarks[0];
+                const main2 = results.multiHandLandmarks[1];
+
+                // Vérifier que les deux mains ont tous les doigts levés
+                const main1Ouverte = this.estDoigtLeve(main1, 2, 4) && this.estDoigtLeve(main1, 5, 8) && 
+                                     this.estDoigtLeve(main1, 9, 12) && this.estDoigtLeve(main1, 13, 16) && 
+                                     this.estDoigtLeve(main1, 17, 20);
+                const main2Ouverte = this.estDoigtLeve(main2, 2, 4) && this.estDoigtLeve(main2, 5, 8) && 
+                                     this.estDoigtLeve(main2, 9, 12) && this.estDoigtLeve(main2, 13, 16) && 
+                                     this.estDoigtLeve(main2, 17, 20);
+
+                if (!main1Ouverte || !main2Ouverte) return false;
+
+                // Vérifier que les paumes sont proches (distance entre les centres des mains)
+                const centre1 = main1[9]; // MCP du majeur
+                const centre2 = main2[9];
+                const distancePaumes = this.distance2D(centre1, centre2);
+
+                // Vérifier verticalité des deux mains
+                const vert1 = Math.abs(main1[12].y - main1[0].y) > Math.abs(main1[12].x - main1[0].x);
+                const vert2 = Math.abs(main2[12].y - main2[0].y) > Math.abs(main2[12].x - main2[0].x);
+
+                // Version plus laxiste: paumes un peu plus éloignées et une seule main bien verticale suffit
+                return distancePaumes < 0.22 && (vert1 || vert2);
+            }
+
+            detecterMainsLevees(results) {
+                // Mains levées = 2 mains ouvertes en haut de l'écran
+                if (!results.multiHandLandmarks || results.multiHandLandmarks.length < 2) {
+                    return false;
+                }
+
+                const main1 = results.multiHandLandmarks[0];
+                const main2 = results.multiHandLandmarks[1];
+
+                // Vérifier que les deux mains ont tous les doigts levés
+                const main1Ouverte = this.estDoigtLeve(main1, 2, 4) && this.estDoigtLeve(main1, 5, 8) && 
+                                     this.estDoigtLeve(main1, 9, 12) && this.estDoigtLeve(main1, 13, 16) && 
+                                     this.estDoigtLeve(main1, 17, 20);
+                const main2Ouverte = this.estDoigtLeve(main2, 2, 4) && this.estDoigtLeve(main2, 5, 8) && 
+                                     this.estDoigtLeve(main2, 9, 12) && this.estDoigtLeve(main2, 13, 16) && 
+                                     this.estDoigtLeve(main2, 17, 20);
+
+                if (!main1Ouverte || !main2Ouverte) return false;
+
+                // Vérifier que les deux mains sont en haut de l'écran (y < 0.4)
+                const main1Haute = main1[9].y < 0.4; // MCP du majeur
+                const main2Haute = main2[9].y < 0.4;
+
+                // Les mains doivent être espacées (pas collées)
+                const distance = this.distance2D(main1[9], main2[9]);
+
+                return main1Haute && main2Haute && distance > 0.15;
+            }
+
+            verifierGeste(landmarks, results) {
                 if (!this.gesteCible || !this.enCours) return;
 
                 const fonction = this.gesteCible.fonction;
-                const gesteDetecte = this[fonction](landmarks);
+                let gesteDetecte = false;
+
+                // Certains gestes nécessitent les résultats complets (multi-mains)
+                const gestesMultiMains = ['detecterCoeur', 'detecterCarre', 'detecterMainsLevees'];
+                
+                if (gestesMultiMains.includes(fonction)) {
+                    gesteDetecte = this[fonction](results);
+                } else {
+                    gesteDetecte = this[fonction](landmarks);
+                }
 
                 if (gesteDetecte) {
                     const now = Date.now();
+                    const dureeMaintien = this.dureeMaintienParGeste[fonction] || 500;
                     if (this.gesteDetectionTime === 0) {
                         this.gesteDetectionTime = now;
-                    } else if (now - this.gesteDetectionTime > 500) {
-                        // Geste maintenu pendant 500ms
+                    } else if (now - this.gesteDetectionTime > dureeMaintien) {
+                        // Geste maintenu pendant une durée suffisante
                         this.gesteReussi();
                         this.gesteDetectionTime = 0;
                     }
@@ -679,7 +1221,7 @@
                         
                         // Vérifier le geste si le jeu est en cours
                         if (this.enCours && index === 0) {
-                            this.verifierGeste(landmarks);
+                            this.verifierGeste(landmarks, results);
                         }
                     });
                 }
@@ -709,59 +1251,50 @@
                 this.ctx.lineWidth = 3;
                 this.ctx.lineCap = 'round';
                 this.ctx.lineJoin = 'round';
+                this.ctx.globalAlpha = 0.8;
 
                 connexions.forEach(([start, end]) => {
                     const s = landmarks[start];
                     const e = landmarks[end];
 
                     if (s && e) {
-                        // Dégradé de couleur pour les lignes
                         this.ctx.strokeStyle = couleurDoigts[end] || '#ff69b4';
-                        this.ctx.globalAlpha = 0.8;
-                        
                         this.ctx.beginPath();
                         this.ctx.moveTo(s.x * this.canvas.width, s.y * this.canvas.height);
                         this.ctx.lineTo(e.x * this.canvas.width, e.y * this.canvas.height);
                         this.ctx.stroke();
-                        
-                        this.ctx.globalAlpha = 1.0;
                     }
                 });
 
-                // Dessiner les points (articulations)
+                this.ctx.globalAlpha = 1.0;
+
+                // Dessiner les points (articulations) - optimisé avec fillRect
                 landmarks.forEach((point, index) => {
                     if (point) {
                         const x = point.x * this.canvas.width;
                         const y = point.y * this.canvas.height;
-
-                        // Couleur selon le point
                         const couleur = couleurDoigts[index] || '#ff69b4';
                         
-                        // Halo autour du point
+                        // Halo avec fillRect (plus rapide qu'arc)
                         this.ctx.fillStyle = couleur;
                         this.ctx.globalAlpha = 0.3;
-                        this.ctx.beginPath();
-                        this.ctx.arc(x, y, 12, 0, Math.PI * 2);
-                        this.ctx.fill();
+                        this.ctx.fillRect(x - 6, y - 6, 12, 12);
                         
                         // Point principal
                         this.ctx.globalAlpha = 1.0;
                         this.ctx.fillStyle = couleur;
-                        this.ctx.strokeStyle = '#ffffff';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.arc(x, y, 5, 0, Math.PI * 2);
-                        this.ctx.fill();
-                        this.ctx.stroke();
+                        this.ctx.fillRect(x - 2.5, y - 2.5, 5, 5);
                     }
                 });
+
+                this.ctx.globalAlpha = 1.0;
             }
 
 
         }
 
         // Lancer l'application
-        console.log('🚀 Application lancée');
+        // console.log('🚀 Application lancée');
         const jeu = new JeuDoigts();
     </script>
 
