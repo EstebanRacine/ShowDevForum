@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Métier de Développeur</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- VARIABLES DE COULEURS NÉON --- */
+        :root {
+            --bg-dark: #090A0F;
+            --bg-panel: #13151f;
+            --neon-cyan: #00f3ff;
+            --neon-purple: #b026ff;
+            --neon-green: #00ff9d;
+            --neon-orange: #ff5e00;
+            --text-light: #e0e6ed;
+        }
+
+        /* --- RESET & GLOBAL --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, #161a2b 0%, var(--bg-dark) 80%);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* --- CONTENEUR DES SLIDES --- */
+        #slider-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 5vw;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            visibility: hidden;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            z-index: 10;
+        }
+
+        /* --- TYPOGRAPHIE & EFFETS NÉON --- */
+        .title-huge {
+            font-size: 5.5vw;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 243, 255, 0.6), 0 0 30px rgba(0, 243, 255, 0.4);
+        }
+        
+        .title-purple { text-shadow: 0 0 15px rgba(176, 38, 255, 0.6), 0 0 30px rgba(176, 38, 255, 0.4); }
+        .title-green { text-shadow: 0 0 15px rgba(0, 255, 157, 0.6), 0 0 30px rgba(0, 255, 157, 0.4); }
+        .title-orange { text-shadow: 0 0 15px rgba(255, 94, 0, 0.6), 0 0 30px rgba(255, 94, 0, 0.4); }
+
+        .text-lead {
+            font-size: 2.2vw;
+            font-weight: 600;
+            max-width: 80%;
+            margin: 0 auto 2rem;
+            color: var(--text-light);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .text-note {
+            font-size: 0.52em;
+            font-style: italic;
+        }
+
+        /* --- ICÔNES ET GRILLES --- */
+        .icon-huge {
+            font-size: 7vw;
+            margin-bottom: 1rem;
+            color: var(--neon-cyan);
+            filter: drop-shadow(0 0 15px var(--neon-cyan));
+        }
+
+        .grid-3 {
+            display: flex;
+            justify-content: center;
+            gap: 3vw;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .grid-item {
+            background: var(--bg-panel);
+            padding: 2.5vw;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.05);
+            width: 22vw;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .grid-item i { font-size: 3.5vw; margin-bottom: 1rem; }
+        .color-cyan i { color: var(--neon-cyan); filter: drop-shadow(0 0 10px var(--neon-cyan)); border-color: rgba(0, 243, 255, 0.3); }
+        .color-purple i { color: var(--neon-purple); filter: drop-shadow(0 0 10px var(--neon-purple)); border-color: rgba(176, 38, 255, 0.3); }
+        .color-green i { color: var(--neon-green); filter: drop-shadow(0 0 10px var(--neon-green)); border-color: rgba(0, 255, 157, 0.3); }
+        .color-orange i { color: var(--neon-orange); filter: drop-shadow(0 0 10px var(--neon-orange)); border-color: rgba(255, 94, 0, 0.3); }
+
+        .grid-item h3 { font-size: 1.8vw; margin-bottom: 0.5rem; }
+        .grid-item p { font-size: 1.1vw; color: #a0aab5; }
+
+        /* --- IMAGES AVEC EFFET NÉON --- */
+        .neon-image {
+            width: 45vw;
+            height: 25vw;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 2rem auto;
+            display: block;
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            opacity: 0.9;
+        }
+
+        /* --- APPEL À L'ACTION (CTA) --- */
+        .cta-box {
+            background: rgba(0, 255, 157, 0.1);
+            border: 3px solid var(--neon-green);
+            padding: 3vw 5vw;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.4);
+            animation: pulse 2s infinite;
+        }
+        .cta-box h2 {
+            font-size: 4vw;
+            color: var(--neon-green);
+            margin-bottom: 0;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(0, 255, 157, 0.8); transform: scale(1.02); }
+            100% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.4); }
+        }
+
+        /* --- BARRE DE PROGRESSION --- */
+        #progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 8px;
+            background: var(--neon-purple);
+            width: 0%;
+            z-index: 100;
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="slider-container">
+        
+        <div class="slide active">
+            <i class="fa-solid fa-mobile-screen icon-huge" style="color: var(--neon-purple); filter: drop-shadow(0 0 15px var(--neon-purple));"></i>
+            <h1 class="title-huge title-purple">Tu passes ta vie<br>sur ces apps...</h1>
+            <p class="text-lead">Mais qui les crée vraiment ?</p>
+        </div>
+
+        <div class="slide">
+            <h1 class="title-huge">Développeur :<br>Un métier du quotidien</h1>
+            <img src="code.jpg" alt="Écran avec du code" class="neon-image">
+            <p class="text-lead">Chaque bouton, chaque swipe, chaque donnée sécurisée a été pensé et codé.</p>
+        </div>
+
+        <div class="slide">
+            <h1 class="title-huge title-cyan">Coder, c'est<br>avoir de l'impact</h1>
+            <div class="grid-3">
+                <div class="grid-item color-cyan">
+                    <i class="fa-solid fa-globe"></i>
+                    <h3>Sites Web</h3>
+                    <p>SaaS, E-commerce, Réseaux sociaux</p>
+                </div>
+                <div class="grid-item color-purple">
+                    <i class="fa-brands fa-app-store-ios"></i>
+                    <h3>Apps Mobiles</h3>
+                    <p>iOS, Android, Outils du quotidien</p>
+                </div>
+                <div class="grid-item color-green">
+                    <i class="fa-solid fa-server"></i>
+                    <h3>Logiciels Pro</h3>
+                    <p>Systèmes critiques, APIs, Data</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h1 class="title-huge title-green">Tout est connecté</h1>
+            <img src="server.jpg" alt="Serveurs et données" class="neon-image" style="border-color: var(--neon-green); box-shadow: 0 0 30px rgba(0, 255, 157, 0.3);">
+            <p class="text-lead">Le Cloud, les Serveurs, la Fibre... C'est l'infrastructure invisible qui fait transiter tes données à travers le monde en un clin d'œil.</p>
+        </div>
+
+        <div class="slide">
+            <i class="fa-solid fa-network-wired icon-huge" style="color: var(--neon-cyan); filter: drop-shadow(0 0 15px var(--neon-cyan));"></i>
+            <h1 class="title-huge title-cyan">Concevoir les<br>prochaines IA</h1>
+            <p class="text-lead">L'Intelligence Artificielle ne tombe pas du ciel : <strong>elle se code.</strong><br>Développer des IA, c'est entraîner des modèles à analyser des milliards de données pour résoudre des problèmes complexes.</p>
+        </div>
+
+        <div class="slide">
+            <h1 class="title-huge title-purple">La galaxie de la Tech</h1>
+            <p class="text-lead" style="margin-bottom: 1rem;">Le Développeur Web est au centre, mais il collabore avec d'autres experts :</p>
+            <div class="grid-3">
+                <div class="grid-item color-orange">
+                    <i class="fa-solid fa-pen-nib"></i>
+                    <h3>UI/UX Designer</h3>
+                    <p>Pense l'ergonomie, crée l'identité visuelle et dessine les interfaces.</p>
+                </div>
+                <div class="grid-item color-green">
+                    <i class="fa-solid fa-terminal"></i>
+                    <h3>Admin Système</h3>
+                    <p>Gère les serveurs, le cloud et garantit la sécurité et les performances.</p>
+                </div>
+                <div class="grid-item color-purple">
+                    <i class="fa-solid fa-list-check"></i>
+                    <h3>Chef de Projet</h3>
+                    <p>Orchestre l'équipe, fait le lien avec le client et gère le planning.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <i class="fa-solid fa-brain icon-huge" style="color: #fff; filter: drop-shadow(0 0 15px #fff);"></i>
+            <h1 class="title-huge">Oublie le cliché des maths.</h1>
+            <p class="text-lead">C'est 100% de la <strong>logique</strong> et de la <strong>recherche</strong>.<br>On identifie un besoin, on construit la solution brique par brique.<br><span class="text-note">(Pas besoin de Pythagore 🙃)</span></p>
+        </div>
+
+        <div class="slide">
+            <h1 class="title-huge">Pourquoi choisir la Tech ?</h1>
+            <div class="grid-3">
+                <div class="grid-item color-green">
+                    <i class="fa-solid fa-laptop-house"></i>
+                    <h3>Flexibilité</h3>
+                    <p>Télétravail, horaires flexibles, culture d'entreprise moderne.</p>
+                </div>
+                <div class="grid-item color-cyan">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <h3>Évolution</h3>
+                    <p>Un secteur dynamique qui valorise rapidement les compétences.</p>
+                </div>
+                <div class="grid-item color-purple">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <h3>Forte Demande</h3>
+                    <p>Peu de problèmes pour trouver un job, les entreprises recrutent en continu.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <i class="fa-solid fa-code icon-huge" style="color: var(--neon-green); filter: drop-shadow(0 0 15px var(--neon-green));"></i>
+            <h1 class="title-huge title-green">Place à la découverte</h1>
+            <br>
+            <div class="cta-box">
+                <h2>VIENS DÉCOUVRIR LES MINI-JEUX<br>CRÉÉS POUR VOUS</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="progress-bar"></div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // --- 10 SECONDES PAR SLIDE ---
+        const SLIDE_DURATION = 10000; 
+        
+        let currentSlide = 0;
+        let progressInterval;
+        let slideTimer;
+
+        // Fonction pour changer de slide
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            
+            // Gestion de la boucle (début ou fin)
+            currentSlide = (index + slides.length) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+            resetSlideTimer();
+        }
+
+        function nextSlide() {
+            goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            goToSlide(currentSlide - 1);
+        }
+
+        // Gestion de la barre de progression et du minuteur
+        function resetSlideTimer() {
+            clearInterval(progressInterval);
+            clearTimeout(slideTimer);
+            
+            progressBar.style.width = '0%';
+            let startTime = Date.now();
+            
+            // Barre de progression fluide
+            progressInterval = setInterval(() => {
+                let elapsedTime = Date.now() - startTime;
+                let percentage = (elapsedTime / SLIDE_DURATION) * 100;
+                
+                if (percentage >= 100) {
+                    percentage = 100;
+                    clearInterval(progressInterval);
+                }
+                
+                progressBar.style.width = percentage + '%';
+            }, 16);
+
+            // Minuteur principal
+            slideTimer = setTimeout(nextSlide, SLIDE_DURATION);
+        }
+
+        // --- CONTRÔLES CLAVIER ---
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Lancement initial
+        resetSlideTimer();
+
+    </script>
+</body>
+</html>
