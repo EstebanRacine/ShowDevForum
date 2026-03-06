@@ -254,8 +254,9 @@
         }
 
         #nav-close {
-            width: 3rem;
+            max-width: 3rem;
             height: 3rem;
+            flex-shrink: 0;
             border: none;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.05);
@@ -271,6 +272,7 @@
         #nav-close svg {
             width: 1.5rem;
             height: 1.5rem;
+            flex-shrink: 0;
         }
 
         #nav-close:hover {
